@@ -10,9 +10,11 @@ thread=3
 size=0
 urlexist=0
 url='https://duckduckgo.com'
-
+start=0
+end=0
+givenrange=0
 def dow(id, start, end, url):
-	f=open('file.part'+str(id), 'wb')
+	f=open('file.part'+str(id), 'wb+')
 	head={
 	'Range': 'bytes='+str(start)+'-'+str(end)
 	}
@@ -29,6 +31,12 @@ try:
 			url=ar[i+1]
 		if ar[i]=='-t':
 			thread=int(ar[i+1])
+		if ar[i]=='-r':
+			dr=ar[i+1]
+			givenrange=1
+			start=int(dr.split('-')[0])
+			end=int(dr.split('-')[1])
+
 	if urlexist==0:
 		url=input("Please Enter the url here: ")
 except Exception as e:
@@ -42,19 +50,24 @@ try:
 		print("Sorry, File not downloadable")
 	else:
 		size=res.headers['Content-Length']
-		print(size)
-		c=input("Want to proceed... ")
+		totalsize=size
 		st=0
+		if givenrange==1:
+			size=end
+			st=start
+			totalsize=end-start
+		print(totalsize)
+		c=input("Want to proceed... ")
 		threads=[]
-		sizediv=int(size)//int(thread)
+		sizediv=int(totalsize)//int(thread)
 		if c=='y' or c=='Y':
 			name=input("Enter name of file here: ")
 			for i in range(0, thread):
 				if i==int(thread)-1:
 					t=threading.Thread(target=dow, args=(i, st, size, url, ))
 				else:
-					t=threading.Thread(target=dow, args=(i, st, (i+1)*sizediv, url, )) 
-				st=(i+1)*sizediv+1
+					t=threading.Thread(target=dow, args=(i, st, st+sizediv, url, )) 
+				st=st+sizediv+1
 				t.start()
 				threads.append(t)
 			for i in threads:
@@ -64,7 +77,6 @@ try:
 				os.system("cat file.part"+str(i)+">>file.part0")
 				os.system("rm file.part"+str(i))
 			os.system("mv file.part0 ./'"+name+"'")
-
 
 except Exception as e:
 	raise e
