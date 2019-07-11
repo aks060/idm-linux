@@ -7,18 +7,39 @@ import threading
 s=requests.session()
 ar=sys.argv
 thread=3
+pdown=0
+tpdown=0
 size=0
 urlexist=0
 url='https://duckduckgo.com'
 start=0
 end=0
 givenrange=0
+
+def dupdate():
+	for i in range(0, (int)tpdown):
+		print(">")
+
+def shortdown(f, start, end, url):
+	head={
+	'Range': 'bytes='+str(start)+'-'+str(end)
+	}
+	res=s.get(url, headers=head)
+	f.write(res.content)
+	f.close()
+
 def dow(id, start, end, url):
 	f=open('file.part'+str(id), 'wb+')
 	head={
 	'Range': 'bytes='+str(start)+'-'+str(end)
 	}
 	print("Downloading file"+str(id)+" bytes from "+str(start)+"-"+str(end))
+	tot=end-start
+	minp=(0.1/100)*tot
+	temp=start
+	while temp<=end:
+
+		
 	res=s.get(url, headers=head)
 	f.write(res.content)
 	f.close()
